@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Portal</title>
+<style>
+:root{--primary:#0478;--accent:#f63;--ink:#0f172a;--muted:#64748b;--bg:#f8fafc;--card:#fff;--line:#e2e8f0;--bad:#c62828;--good:#15803d;--soft:color-mix(in srgb,var(--primary) 12%,white)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5;font-size:15px;-webkit-text-size-adjust:100%}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font:inherit;color:inherit}
+svg{flex:none}
+.hide{display:none!important}
+.logo{width:56px;height:56px;border-radius:14px;background:var(--primary);color:#fff;display:grid;place-items:center;font-weight:800;font-size:22px;overflow:hidden;flex:none}
+.logo img{width:100%;height:100%;object-fit:cover}
+
+/* login */
+.login-page{min-height:100vh;display:grid;place-items:center;padding:24px 16px;background:linear-gradient(165deg,color-mix(in srgb,var(--primary) 42%,#0b1d16),color-mix(in srgb,var(--primary) 78%,#2a7f8c))}
+.login-card{background:whitesmoke;border-radius:22px;padding:34px 30px 28px;width:100%;max-width:440px;box-shadow:0 24px 60px rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.4)}
+.login-card .logo{width:60px;height:60px;border-radius:16px;margin-bottom:22px}
+.login-card h1{text-align:center;font-size:30px;font-weight:800;letter-spacing:-.01em}
+.login-card .lead{text-align:center;color:var(--muted);font-size:17px;margin:6px 0 26px}
+.login-card label.f>span{color:var(--ink);font-size:15px;margin-bottom:8px}
+.login-card input{height:52px;border-radius:14px;font-size:16px}
+.pw{position:relative}.pw input{padding-right:48px}
+.eye{position:absolute;right:6px;top:0;height:52px;width:44px;border:0;background:none;color:var(--muted);cursor:pointer;display:grid;place-items:center}
+.btn.big{width:100%;height:52px;border-radius:14px;font-size:17px;font-weight:500}
+.help{text-align:center;color:var(--muted);font-size:14.5px;margin-top:20px}
+.err{color:var(--bad);font-size:14px;margin:2px 0 10px;min-height:20px}
+
+/* buttons and forms */
+.btn{display:inline-block;padding:10px 18px;border-radius:12px;font-weight:600;font-size:14.5px;border:1.5px solid var(--primary);cursor:pointer;background:var(--primary);color:#fff;text-align:center}
+.btn:disabled{opacity:.5;cursor:default}
+label.f{display:block;margin-bottom:14px}
+label.f>span{display:block;font-size:13.5px;font-weight:600;color:#475569;margin-bottom:5px}
+input[type=text],input[type=password],input[type=date],input[type=email],input[type=number],input[type=search],input[type=color],select,textarea{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff}
+input:focus,select:focus,textarea:focus{outline:3px solid color-mix(in srgb,var(--primary) 25%,white);border-color:var(--primary)}
+/* app shell */
+.app{min-height:100vh}
+.sidebar{position:fixed;inset:0 auto 0 0;width:min(300px,80vw);background:#fff;z-index:70;display:flex;flex-direction:column;transform:translateX(-105%);transition:transform .22s ease;box-shadow:0 0 40px rgba(0,0,0,.2);overflow-y:auto}
+.sidebar.open{transform:none}
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:65;display:none}.overlay.show{display:block}
+.sb-head{display:flex;align-items:center;gap:14px;padding:22px 18px 18px}
+.sb-head .logo{width:52px;height:52px}
+.sb-name{min-width:0;flex:1}.sb-name b{display:block;font-size:20px;font-weight:800;line-height:1.2;overflow-wrap:anywhere}.sb-name span{display:block;color:var(--muted);font-size:14.5px}
+.mclose{align-self:flex-start;border:0;background:none;color:var(--muted);cursor:pointer;padding:4px}
+.sb-nav{padding:10px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.sb-nav a{display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:14px;font-size:17px;font-weight:500;color:#334155}
+.sb-nav a:hover{background:var(--bg)}.sb-nav a.on{background:var(--primary);color:#fff}
+.sb-foot{border-top:1px solid var(--line);padding:20px 18px 22px;margin-top:10px}
+.sb-foot b{display:block;font-size:17px;font-weight:600}.sb-foot span{display:block;color:var(--muted);margin-bottom:14px}
+.btn.out{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;background:#fff;color:var(--ink);border:1px solid var(--line);height:50px;border-radius:12px;font-size:16px;font-weight:500}
+.mtop{display:flex;align-items:center;gap:14px;background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;position:sticky;top:0;z-index:30}
+.mtop .logo{width:44px;height:44px;border-radius:12px;font-size:18px}.mtop b{font-size:18px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.burger{border:0;background:none;cursor:pointer;color:var(--ink);padding:2px;display:grid}
+main#view{padding:26px 18px 60px;min-width:0;max-width:1120px}
+@media(min-width:900px){
+  .sidebar{width:272px;transform:none;box-shadow:none;border-right:1px solid var(--line)}
+  .overlay,.overlay.show{display:none}
+  .mclose,.mtop{display:none}
+  .content{margin-left:272px}
+  main#view{padding:34px 36px 60px}
+}
+
+/* pages and dashboard */
+.pagehead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.pagehead h2{font-size:30px;font-weight:800;letter-spacing:-.015em;line-height:1.15}
+.sub{color:var(--muted);font-size:17px;margin-top:6px}.sub b{color:var(--primary);font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:0 1px 3px rgba(15,23,42,.05)}
+.card h3{font-size:19px;font-weight:700;margin-bottom:10px}.card p{color:var(--muted)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+@media(min-width:900px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat2{background:whitesmoke;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 1px 3px rgba(15,23,42,.05);display:flex;flex-direction:column;justify-content:space-between;min-height:152px}
+.stat-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.stat-top span{color:var(--muted);font-size:17px}
+.sico{width:46px;height:46px;border-radius:14px;display:grid;place-items:center}
+.sico.g{background:#d1fae5;color:#047857}.sico.b{background:#e0f2fe;color:#0369a1}.sico.a{background:#fef3c7;color:#b45309}.sico.p{background:#ede9fe;color:#6d28d9}
+.stat2>b{font-size:42px;font-weight:800;line-height:1}
+.guide ol{padding-left:0;list-style:none;display:flex;flex-direction:column;gap:12px;color:#475569;font-size:16.5px}
+.guide li b{color:#334155}
+.note{background:whitesmoke;border:1px solid #fde68a;border-radius:12px;padding:11px 15px;margin-bottom:16px;font-size:14.5px}
+.empty{padding:34px;text-align:center;color:var(--muted)}
+/* more buttons, lists, modal */
+.btn.ghost{background:#fff;color:var(--primary)}
+.btn.danger{background:#fff;border-color:var(--bad);color:var(--bad)}
+.btn.sm{padding:6px 11px;font-size:13px;border-radius:9px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end}
+.toolbar>*{min-width:150px;flex:1 1 150px;max-width:260px}
+.toolbar .btn{flex:0 0 auto;min-width:0}
+.tablebox{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow-x:auto;box-shadow:0 1px 3px rgba(15,23,42,.05)}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--soft);color:var(--primary)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:900px){.two{grid-template-columns:1fr}}
+.list .li{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.list .li:last-child{border-bottom:0}.list .li span.t{flex:1;min-width:120px;overflow-wrap:anywhere}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:flex-start;justify-content:center;z-index:90;padding:24px 14px;overflow:auto}
+.modal.show{display:flex}
+.box{background:#fff;border-radius:20px;width:100%;max-width:560px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.box.wide{max-width:900px}
+.mh{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+.mh h3{font-size:19px}.x{border:0;background:none;font-size:26px;cursor:pointer;line-height:1;color:var(--muted)}
+.mb{padding:20px}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}.acts .sp{flex:1}
+/* tables, forms, chips, login slips */
+table{width:100%;border-collapse:collapse}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
+th{background:#f1f5f9;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.pill.off{background:#fee2e2;color:var(--bad)}.pill.ok{background:#dcfce7;color:var(--good)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media(max-width:620px){.grid2{grid-template-columns:1fr}}
+.check{display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:14px}.check input{width:auto}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+.chip{background:var(--soft);color:var(--primary);border-radius:99px;padding:3px 6px 3px 12px;font-size:13px;display:flex;gap:6px;align-items:center}
+.chip button{border:0;background:none;cursor:pointer;font-size:16px;line-height:1;color:var(--primary)}
+.cred{background:var(--bg);border:1px dashed var(--primary);border-radius:12px;padding:12px 16px;margin-bottom:10px;font-size:15px}
+.cred b{font-family:ui-monospace,Consolas,monospace;font-size:16px;user-select:all}
+
+/* printing */
+.sheet{background:#fff;border:1px solid var(--line);border-radius:8px;padding:26px;margin-bottom:20px;color:#111;overflow-x:auto}
+.sh-title{text-align:center;font-weight:700;font-size:16px;letter-spacing:.06em;text-transform:uppercase;margin:10px 0}
+.sh-key{font-size:12px;color:#444;margin:8px 0}
+#printArea{display:none}
+@page{size:A4;margin:12mm}
+@media print{
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important}
+  body{background:#fff}
+  #printArea .sheet{border:0;border-radius:0;padding:0;margin:0;page-break-after:always;break-after:page;overflow:visible}
+  #printArea .sheet:last-child{page-break-after:auto;break-after:auto}
+}
+/* grade entry */
+td.num,th.num{text-align:center}
+.gin{width:80px;text-align:center;padding:7px}
+.gin.bad{border-color:var(--bad);background:#fef2f2}
+/* result sheet */
+.sh-head{display:flex;gap:16px;align-items:center;border-bottom:3px double #333;padding-bottom:12px;margin-bottom:12px}
+.sh-head .logo{width:64px;height:64px;border-radius:10px}
+.sh-head h2{font-size:21px;text-transform:uppercase;letter-spacing:.03em}.sh-head p{font-size:12.5px;color:#444}
+.sh-info{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 18px;font-size:13.5px;margin-bottom:12px}
+.sh-info span{color:#555}
+.sheet table{margin-bottom:12px;min-width:480px}.sheet th,.sheet td{border:1px solid #bbb;padding:6px 8px;font-size:13px}
+.sheet th{background:#eceff6;color:#222;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.sh-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:10px}
+.sh-sum div{border:1px solid #bbb;padding:7px 10px;font-size:13px}.sh-sum b{display:block;font-size:16px}
+.sh-sign{display:flex;justify-content:space-between;gap:30px;margin-top:34px;font-size:12.5px}
+.sh-sign div{flex:1;border-top:1px solid #333;padding-top:4px;text-align:center}
+.sh-cum{border:2px solid #333;margin-top:6px;padding:8px 10px}
+.sh-cum h4{font-size:13px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+@media(max-width:620px){.sh-info{grid-template-columns:1fr 1fr}.sheet{padding:14px}}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap}
+/* toast messages */
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:99;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:max-content;max-width:92vw}
+#toast div{background:#0f172a;color:#fff;padding:11px 18px;border-radius:12px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+#toast div.e{background:var(--bad)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal" class="modal"></div>
+<div id="toast"></div>
+<div id ="printArea"></div>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+async function api(method, url, body) {
+  const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: body ? JSON.stringify(body) : undefined });
+  let d = {}; try { d = await r.json(); } catch (e) { /* no body */ }
+  if (!r.ok) { const e = new Error(d.error || 'Request failed'); e.status = r.status; throw e; }
+  return d;
+}
+
+const S = { pub: null, me: null, page: null };
+const toast = (m, bad) => { const d = document.createElement('div'); d.textContent = m; if (bad) d.className = 'e'; $('#toast').appendChild(d); setTimeout(() => d.remove(), bad ? 6000 : 3000); };
+const fail = e => { if (e.status === 401 && S.me) { S.me = null; render(); } toast(e.message, true); };
+function fd(root) {
+  const o = {};
+  document.querySelectorAll(root + ' [name]').forEach(el => { o[el.name] = el.type === 'checkbox' ? el.checked : el.value; });
+  return o;
+}
+const opts = (list, sel, label = x => x.name, blank) => (blank !== undefined ? `<option value="">${esc(blank)}</option>` : '') + list.map(x => `<option value="${x.id}"${String(x.id) === String(sel) ? ' selected' : ''}>${esc(label(x))}</option>`).join('');
+const field = (label, html, hint) => `<label class="f"><span>${label}</span>${html}${hint ? `<small>${hint}</small>` : ''}</label>`;
+/* ---------- modal dialogs ---------- */
+function openModal(title, body, wide) {
+  $('#modal').innerHTML = `<div class="box ${wide ? 'wide' : ''}"><div class="mh"><h3>${esc(title)}</h3><button class="x" onclick="closeModal()" aria-label="Close">×</button></div><div class="mb">${body}</div></div>`;
+  $('#modal').classList.add('show');
+}
+function closeModal() { $('#modal').classList.remove('show'); $('#modal').innerHTML = ''; }
+$('#modal').addEventListener('mousedown', e => { if (e.target.id === 'modal') closeModal(); });
+function askText(title, value, label) {
+  return new Promise(res => {
+    openModal(title, `<form id="qf">${field(label || 'Name', `<input type="text" name="v" value="${esc(value || '')}" autofocus>`)}<div class="acts"><button class="btn" type="submit">Save</button><button class="btn ghost" type="button" onclick="closeModal()">Cancel</button></div></form>`);
+    $('#qf').onsubmit = e => { e.preventDefault(); const v = $('#qf [name=v]').value.trim(); closeModal(); res(v || null); };
+    $('#modal').querySelector('.x').addEventListener('click', () => res(null));
+    setTimeout(() => $('#qf [name=v]').focus(), 30);
+  });
+}
+const inp = (name, val, type = 'text', extra = '') => `<input type="${type}" name="${name}" value="${esc(val ?? '')}" ${extra}>`;
+const table = (cols, rows, emptyMsg) => rows.length ? `<div class="tablebox"><table><thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>` : `<div class="tablebox"><div class="empty">${emptyMsg}</div></div>`;
+const loginCell = p => p.username ? `${esc(p.username)} ${p.login_active === 0 ? '<span class="pill off">off</span>' : ''}` : '<span class="pill off">no login</span>';
+const ord = n => { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+const fmt = n => n == null ? '–' : (Math.round(n * 100) / 100).toString();
+const gradeOf = x => x >= 70 ? 'A' : x >= 60 ? 'B' : x >= 50 ? 'C' : x >= 45 ? 'D' : x >= 40 ? 'E' : 'F';
+function showCreds(list, title) {
+  const rows = list.map(c => `<div class="cred">${c.who ? `<div>${esc(c.who)}</div>` : ''}Username: <b>${esc(c.username)}</b><br>Password: <b>${esc(c.password)}</b></div>`).join('');
+  openModal(title || 'Login details', `<p style="margin-bottom:12px">Write these down or print the slip now. The password is not shown again. Only the administrator can reset it.</p>${rows}<div class="acts"><button class="btn" onclick='printCreds(${esc(JSON.stringify(JSON.stringify(list)))})'>Print slip</button><button class="btn ghost" onclick="closeModal()">Done</button></div>`);
+}
+function printCreds(json) {
+  const list = JSON.parse(json);
+  printHTML(list.map(c => `<div class="sheet"><div class="sh-title">${esc(S.pub.schoolName)} Portal Login</div><p style="margin:10px 0">${esc(c.who || '')}</p><p style="font-size:16px">Username: <b>${esc(c.username)}</b></p><p style="font-size:16px">Password: <b>${esc(c.password)}</b></p><p class="sh-key">Keep this slip safe. Passwords can only be reset by the school administrator.</p></div>`).join(''));
+}
+function printHTML(html) {
+  $('#printArea').innerHTML = html;
+  setTimeout(() => { window.print(); }, 60);
+}
+async function makeLogin(role, ref) {
+  try { const c = await api('POST', '/api/users', { role, ref_id: ref }); closeModal(); showCreds([c]); S.page === 'students' ? loadStudents() : route(); } catch (e) { fail(e); }
+}
+/* ---------- icons, theme, header ---------- */
+const ICONS = {
+  book: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+  dash: '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+  cap: '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
+  user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  layers: '<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+  up: '<circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 16V8"/>',
+  print: '<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/>',
+  key: '<path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>',
+  out: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
+  menu: '<line x1="4" x2="20" y1="7" y2="7"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="17" y2="17"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  eye: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  file: '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5z"/><polyline points="14 2 14 8 20 8"/>',
+    db: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>'
+};
+const ico = (n, s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]}</svg>`;
+const ROLE = { admin: 'Admin', teacher: 'Teacher', parent: 'Parent', student: 'Student' };
+function applyTheme() {
+  const P = S.pub, r = document.documentElement.style;
+  r.setProperty('--primary', P.primaryColor); r.setProperty('--accent', P.accentColor);
+  document.title = P.schoolName + ' | Portal';
+}
+const logoHTML = () => `<div class="logo">${S.pub.logoUrl ? `<img src="${esc(S.pub.logoUrl)}" alt="">` : (S.pub.logoText ? esc(S.pub.logoText) : ico('book', 28))}</div>`;
+/* ---------- boot / views ---------- */
+async function boot() {
+  S.pub = await api('GET', '/api/public');
+  try { S.me = await api('GET', '/api/me'); } catch (e) { S.me = null; }
+  applyTheme(); render();
+}
+function render() { S.me ? appView() : landing(); }
+
+function landing() {
+  const P = S.pub;
+  $('#app').innerHTML = `<div class="login-page"><form class="login-card" id="lf">
+    ${logoHTML()}<h1>${esc(P.schoolName)}</h1><p class="lead">Sign in to the school portal</p>
+    <label class="f"><span>Username</span><input type="text" name="username" autocomplete="username" autocapitalize="none" autocorrect="off" autofocus></label>
+    <label class="f"><span>Password</span><div class="pw"><input type="password" name="password" id="lpw" autocomplete="current-password"><button type="button" class="eye" id="eye" aria-label="Show password">${ico('eye', 22)}</button></div></label>
+    <div class="err" id="lerr"></div><button class="btn big" type="submit">Sign in</button>
+    <p class="help">Forgot your password? Contact the school administrator. Only the administrator can reset passwords.</p></form></div>`;
+  $('#eye').onclick = () => { const i = $('#lpw'); i.type = i.type === 'password' ? 'text' : 'password'; };
+  $('#lf').onsubmit = async e => {
+    e.preventDefault(); const d = fd('#lf'); $('#lerr').textContent = '';
+    try { await api('POST', '/api/login', d); S.me = await api('GET', '/api/me'); S.pub = await api('GET', '/api/public'); S.page = null; applyTheme(); render(); }
+    catch (er) { $('#lerr').textContent = er.message; }
+  };
+}
+/* ---------- app layout ---------- */
+const V = () => $('#view');
+const NAV = {
+  admin: [['dashboard', 'Dashboard', 'dash'], ['students', 'Students', 'cap'], ['teachers', 'Teachers', 'user'], ['parents', 'Parents', 'users'], ['classes', 'Classes & Sessions', 'layers'], ['promote', 'Promotion', 'up'], ['results', 'Results & Printing', 'print'], ['accounts', 'Accounts & Passwords', 'key'], ['backup', 'Backup & Restore', 'db'], ['settings', 'School Settings', 'gear']],
+  teacher: [['grades', 'Enter Grades', 'edit']],
+  parent: [['myresults', "Children's Results", 'file']],
+  student: [['myresults', 'My Results', 'file']]
+};
+function appView() {
+  const nav = NAV[S.me.role], P = S.pub;
+  $('#app').innerHTML = `<div class="app"><div class="overlay" id="ov" onclick="menu(false)"></div>
+  <aside class="sidebar" id="side"><div class="sb-head">${logoHTML()}<div class="sb-name"><b>${esc(P.schoolName)}</b><span>${esc(P.tagline)}</span></div><button class="mclose" onclick="menu(false)" aria-label="Close menu">${ico('x', 26)}</button></div>
+  <nav class="sb-nav">${nav.map(([k, t, i]) => `<a href="#${k}" data-k="${k}" onclick="menu(false)">${ico(i, 22)}<span>${esc(t)}</span></a>`).join('')}</nav>
+  <div class="sb-foot"><b>${esc(S.me.name)}</b><span>${ROLE[S.me.role]}</span><button class="btn out" onclick="logout()">${ico('out', 20)} Log out</button></div></aside>
+  <div class="content"><div class="mtop"><button class="burger" onclick="menu(true)" aria-label="Open menu">${ico('menu', 28)}</button>${logoHTML()}<b>${esc(P.schoolName)} — ${ROLE[S.me.role]}</b></div><main id="view"></main></div></div>`;
+  route();
+}
+const menu = o => { $('#side').classList.toggle('open', o); $('#ov').classList.toggle('show', o); };
+async function logout() { try { await api('POST', '/api/logout'); } catch (e) { /* ignore */ } S.me = null; location.hash = ''; render(); }
+window.addEventListener('hashchange', () => { if (S.me) route(); });
+
+const PAGES = { dashboard: pDashboard, classes: pClasses, parents: pParents,teachers: pTeachers, students: pStudents, grades: pGrades, myresults: pMyResults, results: pAdminResults, accounts: pAccounts, promote: pPromote, settings: pSettings, backup: pBackup };
+
+async function route() {
+  const nav = NAV[S.me.role];
+  let k = location.hash.replace('#', ''); if (!nav.some(n => n[0] === k)) k = nav[0][0];
+  S.page = k;
+  document.querySelectorAll('#side a').forEach(a => a.classList.toggle('on', a.dataset.k === k));
+  V().innerHTML = '<div class="empty">Loading…</div>';
+  const page = PAGES[k] || (async () => { V().innerHTML = head(nav.find(n => n[0] === k)[1]) + '<div class="note">This page is coming in a later step.</div>'; });
+  try { await page(); } catch (e) { if (e.status === 401) fail(e); else V().innerHTML = `<div class="note">${esc(e.message)}</div>`; }
+}
+
+const head = (t, btn, sub) => `<div class="pagehead"><div><h2>${esc(t)}</h2>${sub ? `<p class="sub">${sub}</p>` : ''}</div>${btn || ''}</div>`;
+
+/* ---------- admin: dashboard ---------- */
+async function pDashboard() {
+  const [st, pub] = await Promise.all([api('GET', '/api/stats'), api('GET', '/api/public')]);
+  S.pub = pub;
+  V().innerHTML = `${head('Dashboard', '', `Current session: <b>${esc(pub.session)}</b> · Term ${esc(pub.term)}`)}
+  <div class="stats">${[['students', 'Students', 'cap', 'g'], ['teachers', 'Teachers', 'user', 'b'], ['parents', 'Parents', 'users', 'a'], ['classes', 'Classes', 'layers', 'p']].map(([k, t, i, c]) => `<div class="stat2"><div class="stat-top"><span>${t}</span><div class="sico ${c}">${ico(i, 24)}</div></div><b>${st[k]}</b></div>`).join('')}</div>
+  <div class="card guide"><h3>Quick guide</h3><ol>
+  <li>1. Set up <b>Classes, Subjects and Sessions</b> under “Classes &amp; Sessions”.</li>
+  <li>2. Register <b>teachers and parents</b>. Each gets a username and password you can reset anytime.</li>
+  <li>3. Register <b>students</b>, link them to a parent and place them in a class.</li>
+  <li>4. Teachers enter <b>CA (30) + Exam (70)</b> scores for each of the three terms.</li>
+  <li>5. Print each term under <b>Results &amp; Printing</b>. The third term sheet also carries the cumulative.</li>
+  <li>6. After third term, use <b>Promotion</b> to move students up, then start the new session.</li></ol></div>`;
+}
+
+/* ---------- admin: classes and sessions ---------- */
+async function pClasses() {
+  const [classes, subjects, pub, sessions] = await Promise.all([api('GET', '/api/classes'), api('GET', '/api/subjects'), api('GET', '/api/public'), api('GET', '/api/sessions')]); S.pub = pub;
+  V().innerHTML = `${head('Classes & Sessions')}
+  <div class="card" style="margin-bottom:18px"><h3>Session and term</h3>
+  <div class="toolbar" style="margin-bottom:6px">${field('Current session', `<input type="text" id="sess" value="${esc(pub.session)}" placeholder="2026/2027">`)}
+  ${field('Current term', `<select id="sterm">${[1, 2, 3].map(t => `<option value="${t}"${String(t) === pub.term ? ' selected' : ''}>Term ${t}</option>`).join('')}</select>`)}<button class="btn" onclick="saveSession()">Save</button></div>
+  <p style="font-size:14px">Teachers can enter and correct grades for terms up to the current term. Three terms make one session. Sessions with results: ${sessions.map(s => `<span class="pill">${esc(s)}</span>`).join(' ')}</p></div>
+  <p style="margin-bottom:12px;color:var(--muted)">The class order below is the promotion order. Use the arrows to reorder.</p>
+  <div class="two"><div><div class="tablebox list"><div class="li" style="background:#f1f5f9"><b>Classes</b></div>
+  ${classes.map((c, i) => `<div class="li"><span class="t"><b>${esc(c.name)}</b> <span class="pill">${c.students} students</span></span>
+    <button class="btn ghost sm" ${i === 0 ? 'disabled' : ''} onclick="moveClass(${c.id},-1)" aria-label="Move up">▲</button><button class="btn ghost sm" ${i === classes.length - 1 ? 'disabled' : ''} onclick="moveClass(${c.id},1)" aria-label="Move down">▼</button>
+    <button class="btn ghost sm" data-name="${esc(c.name)}" onclick="renameItem('classes',${c.id},this.dataset.name)">Rename</button><button class="btn danger sm" onclick="delItem('classes',${c.id})">Delete</button></div>`).join('')}
+  <div class="li"><input type="text" id="newclass" placeholder="New class name" style="flex:1"><button class="btn sm" onclick="addItem('classes','newclass')">Add</button></div></div></div>
+  <div><div class="tablebox list"><div class="li" style="background:#f1f5f9"><b>Subjects</b></div>
+  ${subjects.map(s => `<div class="li"><span class="t">${esc(s.name)}</span><button class="btn ghost sm" data-name="${esc(s.name)}" onclick="renameItem('subjects',${s.id},this.dataset.name)">Rename</button><button class="btn danger sm" onclick="delItem('subjects',${s.id})">Delete</button></div>`).join('')}
+  <div class="li"><input type="text" id="newsubject" placeholder="New subject name" style="flex:1"><button class="btn sm" onclick="addItem('subjects','newsubject')">Add</button></div></div></div></div>`;
+}
+
+async function saveSession() {
+  try { S.pub = await api('PUT', '/api/settings', { session: $('#sess').value, term: $('#sterm').value }); toast('Session and term saved'); pClasses(); } catch (e) { fail(e); }
+}
+async function addItem(kind, inputId) { const v = $('#' + inputId).value.trim(); if (!v) return; try { await api('POST', '/api/' + kind, { name: v }); pClasses(); } catch (e) { fail(e); } }
+async function renameItem(kind, id, cur) { const v = await askText('Rename', cur); if (!v) return; try { await api('PUT', `/api/${kind}/${id}`, { name: v }); pClasses(); } catch (e) { fail(e); } }
+async function delItem(kind, id) { if (!confirm('Delete this item?')) return; try { await api('DELETE', `/api/${kind}/${id}`); pClasses(); } catch (e) { fail(e); } }
+async function moveClass(id, dir) { try { await api('POST', `/api/classes/${id}/move`, { dir }); pClasses(); } catch (e) { fail(e); } }
+/* ---------- admin: parents ---------- */
+async function pParents() {
+  V().innerHTML = `${head('Parents', '<button class="btn" onclick="parentForm()">+ Add parent</button>')}<div class="toolbar">${field('Search', '<input type="search" id="pq" placeholder="Name or phone">')}</div><div id="plist"></div>`;
+  let t; $('#pq').oninput = () => { clearTimeout(t); t = setTimeout(loadParents, 250); }; loadParents();
+}
+async function loadParents() {
+  const list = await api('GET', '/api/parents?q=' + encodeURIComponent($('#pq')?.value || ''));
+  $('#plist').innerHTML = table(['Name', 'Phone', 'Email', 'Children', 'Login', ''], list.map(p => `<tr><td><b>${esc(p.name)}</b></td><td>${esc(p.phone || '–')}</td><td>${esc(p.email || '–')}</td><td>${p.children.length ? p.children.map(c => esc(c.first_name + ' ' + c.last_name + ' (' + (c.class_name || '') + ')')).join('<br>') : '–'}</td><td>${loginCell(p)}</td><td><button class="btn ghost sm" onclick="parentForm(${p.id})">Edit</button></td></tr>`), 'No parents yet. Use “Add parent”.');
+}
+async function parentForm(id) {
+  const p = id ? (await api('GET', '/api/parents')).find(x => x.id === id) : {};
+  openModal(id ? 'Edit parent' : 'Register parent', `<form id="pform" onsubmit="return false">
+  ${field('Full name *', inp('name', p.name))}<div class="grid2">${field('Phone', inp('phone', p.phone))}${field('Email', inp('email', p.email, 'email'))}</div>
+  <div class="grid2">${field('Occupation', inp('occupation', p.occupation))}${field('Address', inp('address', p.address))}</div>
+  ${id ? '' : `<label class="check"><input type="checkbox" name="create_login" checked> Create a login for this parent</label><div class="grid2">${field('Username', inp('username', ''), 'Blank = auto')}${field('Password', inp('password', ''), 'Blank = auto-generated')}</div>`}
+  <div class="acts"><button class="btn" onclick="saveParent(${id || 0})">${id ? 'Save changes' : 'Register'}</button><button class="btn ghost" onclick="closeModal()">Cancel</button><span class="sp"></span>
+  ${id ? `${p.username ? '' : `<button class="btn ghost" onclick="makeLogin('parent',${id})">Create login</button>`}<button class="btn danger" onclick="delParent(${id})">Delete</button>` : ''}</div></form>`);
+}
+async function saveParent(id) {
+  const d = fd('#pform');
+  try {
+    const r = id ? await api('PUT', '/api/parents/' + id, d) : await api('POST', '/api/parents', d);
+    toast(id ? 'Parent updated' : 'Parent registered'); closeModal();
+    if (!id && r.credentials) showCreds([{ who: 'Parent: ' + d.name, ...r.credentials }]); loadParents();
+  } catch (e) { fail(e); }
+}
+async function delParent(id) {
+  if (!confirm('Delete this parent and their login? Their children stay registered but will have no parent linked.')) return;
+  try { await api('DELETE', '/api/parents/' + id); closeModal(); toast('Parent deleted'); loadParents(); } catch (e) { fail(e); }
+}
+/* ---------- admin: teachers ---------- */
+let TA = [], TCL = [], TSU = [];
+async function pTeachers() {
+  V().innerHTML = `${head('Teachers', '<button class="btn" onclick="teacherForm()">+ Add teacher</button>')}<div class="toolbar">${field('Search', '<input type="search" id="tq" placeholder="Name or phone">')}</div><div id="tlist"></div>`;
+  let t; $('#tq').oninput = () => { clearTimeout(t); t = setTimeout(loadTeachers, 250); }; loadTeachers();
+}
+async function loadTeachers() {
+  const list = await api('GET', '/api/teachers?q=' + encodeURIComponent($('#tq')?.value || ''));
+  $('#tlist').innerHTML = table(['Name', 'Phone', 'Email', 'Classes/subjects', 'Login', ''], list.map(t => `<tr><td><b>${esc(t.name)}</b></td><td>${esc(t.phone || '–')}</td><td>${esc(t.email || '–')}</td><td>${t.assignment_count}</td><td>${loginCell(t)}</td><td><button class="btn ghost sm" onclick="teacherForm(${t.id})">Edit</button></td></tr>`), 'No teachers yet. Use “Add teacher”.');
+}
+async function teacherForm(id) {
+  [TCL, TSU] = await Promise.all([api('GET', '/api/classes'), api('GET', '/api/subjects')]);
+  const t = id ? (await api('GET', '/api/teachers')).find(x => x.id === id) : {};
+  TA = id ? await api('GET', `/api/teachers/${id}/assignments`) : [];
+  openModal(id ? 'Edit teacher' : 'Register teacher', `<form id="tform" onsubmit="return false">
+  ${field('Full name *', inp('name', t.name))}<div class="grid2">${field('Phone', inp('phone', t.phone))}${field('Email', inp('email', t.email, 'email'))}</div>
+  <div class="grid2">${field('Qualification', inp('qualification', t.qualification))}${field('Address', inp('address', t.address))}</div>
+  <label class="f"><span>Classes and subjects this teacher enters grades for</span></label><div class="chips" id="tchips"></div>
+  <div class="toolbar" style="margin-bottom:12px"><select id="ac">${opts(TCL, '', c => c.name, 'Class…')}</select><select id="as">${opts(TSU, '', s => s.name, 'Subject…')}</select><button class="btn ghost sm" type="button" onclick="addAsg()">Add</button></div>
+  ${id ? '' : `<label class="check"><input type="checkbox" name="create_login" checked> Create a login for this teacher</label><div class="grid2">${field('Username', inp('username', ''), 'Blank = auto')}${field('Password', inp('password', ''), 'Blank = auto-generated')}</div>`}
+  <div class="acts"><button class="btn" onclick="saveTeacher(${id || 0})">${id ? 'Save changes' : 'Register'}</button><button class="btn ghost" onclick="closeModal()">Cancel</button><span class="sp"></span>
+  ${id ? `${t.username ? '' : `<button class="btn ghost" onclick="makeLogin('teacher',${id})">Create login</button>`}<button class="btn danger" onclick="delTeacher(${id})">Delete</button>` : ''}</div></form>`, true);
+  drawAsg();
+}
+function drawAsg() {
+  const cn = id => (TCL.find(c => c.id === +id) || {}).name, sn = id => (TSU.find(s => s.id === +id) || {}).name;
+  $('#tchips').innerHTML = TA.length ? TA.map((a, i) => `<span class="chip">${esc(cn(a.class_id))} · ${esc(sn(a.subject_id))}<button type="button" onclick="TA.splice(${i},1);drawAsg()" aria-label="Remove">×</button></span>`).join('') : '<span style="color:var(--muted);font-size:13px">None yet. Pick a class and subject below, then press Add.</span>';
+}
+function addAsg() {
+  const c = +$('#ac').value, s = +$('#as').value; if (!c || !s) return toast('Choose a class and a subject', true);
+  if (!TA.some(a => a.class_id === c && a.subject_id === s)) TA.push({ class_id: c, subject_id: s }); drawAsg();
+}
+async function saveTeacher(id) {
+  const d = fd('#tform'); delete d.ac; delete d.as; d.assignments = TA;
+  try {
+    const r = id ? await api('PUT', '/api/teachers/' + id, d) : await api('POST', '/api/teachers', d);
+    toast(id ? 'Teacher updated' : 'Teacher registered'); closeModal();
+    if (!id && r.credentials) showCreds([{ who: 'Teacher: ' + d.name, ...r.credentials }]); loadTeachers();
+  } catch (e) { fail(e); }
+}
+async function delTeacher(id) {
+  if (!confirm('Delete this teacher and their login? Grades they entered are kept.')) return;
+  try { await api('DELETE', '/api/teachers/' + id); closeModal(); toast('Teacher deleted'); loadTeachers(); } catch (e) { fail(e); }
+}
+/* ---------- admin: students ---------- */
+const SF = { class_id: '', q: '', status: 'active' };
+async function pStudents() {
+  const classes = await api('GET', '/api/classes');
+  V().innerHTML = `${head('Students', '<button class="btn" onclick="studentForm()">+ Add student</button>')}
+  <div class="toolbar">${field('Class', `<select id="sfc" onchange="SF.class_id=this.value;loadStudents()">${opts(classes, SF.class_id, c => c.name, 'All classes')}</select>`)}
+  ${field('Search', `<input type="search" id="sfq" placeholder="Name or admission no." value="${esc(SF.q)}">`)}
+  ${field('Status', `<select id="sfs" onchange="SF.status=this.value;loadStudents()"><option value="active"${SF.status === 'active' ? ' selected' : ''}>Active</option><option value="graduated"${SF.status === 'graduated' ? ' selected' : ''}>Graduated</option><option value="withdrawn"${SF.status === 'withdrawn' ? ' selected' : ''}>Withdrawn</option><option value=""${SF.status === '' ? ' selected' : ''}>All</option></select>`)}</div>
+  <div id="slist"></div>`;
+  let t; $('#sfq').oninput = e => { clearTimeout(t); t = setTimeout(() => { SF.q = e.target.value; loadStudents(); }, 250); };
+  loadStudents();
+}
+async function loadStudents() {
+  const qs = new URLSearchParams(Object.entries(SF).filter(([, v]) => v)).toString();
+  const list = await api('GET', '/api/students?' + qs);
+  $('#slist').innerHTML = table(['Adm. no', 'Name', 'Class', 'Parent', 'Login', ''], list.map(s => `<tr><td>${esc(s.admission_no)}</td><td><b>${esc(s.last_name)}</b> ${esc(s.first_name)}</td><td>${esc(s.class_name)}${s.status !== 'active' ? ` <span class="pill off">${esc(s.status)}</span>` : ''}</td><td>${esc(s.parent_name || '–')}</td><td>${loginCell(s)}</td><td><button class="btn ghost sm" onclick="studentForm(${s.id})">Edit</button></td></tr>`), 'No students found. Use “Add student” to register the first one.');
+}
+async function studentForm(id) {
+  const [classes, parents] = await Promise.all([api('GET', '/api/classes'), api('GET', '/api/parents')]);
+  const s = id ? await api('GET', '/api/students/' + id) : { status: 'active', class_id: SF.class_id };
+  openModal(id ? 'Edit student' : 'Register student', `<form id="sform" onsubmit="return false">
+  <div class="grid2">${field('First name *', inp('first_name', s.first_name))}${field('Last name *', inp('last_name', s.last_name))}
+  ${field('Gender', `<select name="gender">${['', 'Male', 'Female'].map(g => `<option value="${g}"${s.gender === g || (!s.gender && !g) ? ' selected' : ''}>${g || '—'}</option>`).join('')}</select>`)}${field('Date of birth', inp('dob', s.dob, 'date'))}
+  ${field('Class *', `<select name="class_id">${opts(classes, s.class_id, c => c.name, 'Choose class')}</select>`)}${field('Admission number', inp('admission_no', s.admission_no), id ? '' : 'Leave blank to generate one')}</div>
+  ${field('Parent / guardian', `<select name="parent_id">${opts(parents, s.parent_id, p => p.name + (p.phone ? ' (' + p.phone + ')' : ''), '— none yet —')}</select>`)}
+  ${id ? '' : `<div class="grid2">${field('Or register a new parent now: name', inp('np_name', ''))}${field('Parent phone', inp('np_phone', ''))}</div>`}
+  ${field('Address', inp('address', s.address))}
+  ${id ? field('Status', `<select name="status">${['active', 'graduated', 'withdrawn'].map(x => `<option${s.status === x ? ' selected' : ''}>${x}</option>`).join('')}</select>`) : `<label class="check"><input type="checkbox" name="create_login" checked> Create a login for this student</label>
+  <div class="grid2">${field('Username', inp('username', ''), 'Blank = admission number')}${field('Password', inp('password', ''), 'Blank = auto-generated')}</div>`}
+  <div class="acts"><button class="btn" onclick="saveStudent(${id || 0})">${id ? 'Save changes' : 'Register'}</button><button class="btn ghost" onclick="closeModal()">Cancel</button><span class="sp"></span>
+  ${id ? `${s.username ? '' : `<button class="btn ghost" onclick="makeLogin('student',${id})">Create login</button>`}<button class="btn danger" onclick="delStudent(${id})">Delete</button>` : ''}</div></form>`);
+}
+async function saveStudent(id) {
+  const d = fd('#sform'); const creds = [];
+  try {
+    if (!id && d.np_name && d.np_name.trim()) {
+      const p = await api('POST', '/api/parents', { name: d.np_name, phone: d.np_phone });
+      d.parent_id = p.id; if (p.credentials) creds.push({ who: 'Parent: ' + d.np_name, ...p.credentials });
+    }
+    const body = { ...d, parent_id: d.parent_id || null }; delete body.np_name; delete body.np_phone;
+    const r = id ? await api('PUT', '/api/students/' + id, body) : await api('POST', '/api/students', body);
+    toast(id ? 'Student updated' : 'Student registered');
+    if (!id && r.credentials) creds.unshift({ who: `Student: ${d.first_name} ${d.last_name} (${r.admission_no})`, ...r.credentials });
+    closeModal(); if (creds.length) showCreds(creds); loadStudents();
+  } catch (e) { fail(e); }
+}
+async function delStudent(id) {
+  if (!confirm('Delete this student and all their grades? This cannot be undone. (To keep records, set the status to Withdrawn instead.)')) return;
+  try { await api('DELETE', '/api/students/' + id); closeModal(); toast('Student deleted'); loadStudents(); } catch (e) { fail(e); }
+}
+/* ---------- teacher: grade entry ---------- */
+let G = null;
+async function pGrades() {
+  const [asg, pub] = await Promise.all([api('GET', '/api/my/assignments'), api('GET', '/api/public')]); S.pub = pub;
+  if (!asg.length) { V().innerHTML = `${head('Enter Grades')}<div class="note">You have not been assigned a class and subject yet. Please ask the school administrator.</div>`; return; }
+  V().innerHTML = `${head('Enter Grades')}<div class="note">Session ${esc(pub.session)}. Continuous Assessment is out of 30 and Exam is out of 70. You can correct scores any time while the term is open.</div>
+  <div class="toolbar">${field('Class and subject', `<select id="ga">${asg.map(a => `<option value="${a.class_id}:${a.subject_id}">${esc(a.class_name)} · ${esc(a.subject_name)}</option>`).join('')}</select>`)}
+  ${field('Term', `<select id="gt">${[1, 2, 3].filter(t => t <= +pub.term).map(t => `<option value="${t}"${t === +pub.term ? ' selected' : ''}>Term ${t}</option>`).join('')}</select>`)}<button class="btn" onclick="loadSheet()">Open</button></div><div id="gsheet"></div>`;
+}
+async function loadSheet() {
+  const [c, s] = $('#ga').value.split(':'), t = $('#gt').value;
+  try {
+    const d = await api('GET', `/api/gradesheet?class_id=${c}&subject_id=${s}&term=${t}`); G = { c: +c, s: +s, t: +t };
+    $('#gsheet').innerHTML = !d.students.length ? '<div class="tablebox"><div class="empty">There are no active students in this class yet.</div></div>' : `
+    <div class="tablebox" style="margin-bottom:14px"><table><thead><tr><th>#</th><th>Adm. no</th><th>Student</th><th class="num">CA (0–30)</th><th class="num">Exam (0–70)</th><th class="num">Total</th><th class="num">Grade</th></tr></thead><tbody>
+    ${d.students.map((s, i) => `<tr data-id="${s.id}"><td>${i + 1}</td><td>${esc(s.admission_no)}</td><td><b>${esc(s.last_name)}</b> ${esc(s.first_name)}</td>
+    <td class="num"><input class="gin" type="number" step="0.5" min="0" max="30" data-f="ca" value="${s.ca ?? ''}" oninput="gcalc(this)"></td>
+    <td class="num"><input class="gin" type="number" step="0.5" min="0" max="70" data-f="exam" value="${s.exam ?? ''}" oninput="gcalc(this)"></td><td class="num gt">–</td><td class="num gg">–</td></tr>`).join('')}</tbody></table></div>
+    <button class="btn" onclick="saveSheet()">Save scores</button>`;
+    document.querySelectorAll('#gsheet tbody tr').forEach(tr => gcalc(tr.querySelector('input')));
+    document.querySelectorAll('#gsheet .gin').forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); const all = [...document.querySelectorAll('#gsheet .gin')]; const n = all[all.indexOf(el) + 1]; if (n) n.focus(); } }));
+  } catch (e) { fail(e); }
+}
+function gcalc(el) {
+  const tr = el.closest('tr'), ca = tr.querySelector('[data-f=ca]'), ex = tr.querySelector('[data-f=exam]');
+  const chk = (i, max) => { const v = i.value; const bad = v !== '' && (isNaN(+v) || +v < 0 || +v > max); i.classList.toggle('bad', bad); return bad; };
+  const b1 = chk(ca, 30), b2 = chk(ex, 70);
+  if (ca.value === '' && ex.value === '') { tr.querySelector('.gt').textContent = '–'; tr.querySelector('.gg').textContent = '–'; return; }
+  const t = (+ca.value || 0) + (+ex.value || 0);
+  tr.querySelector('.gt').textContent = b1 || b2 ? '!' : fmt(t); tr.querySelector('.gg').textContent = b1 || b2 ? '!' : gradeOf(t);
+}
+async function saveSheet() {
+  if (document.querySelector('#gsheet .gin.bad')) return toast('Fix the red scores first. CA is up to 30 and Exam is up to 70.', true);
+  const rows = [...document.querySelectorAll('#gsheet tbody tr')].map(tr => ({ student_id: +tr.dataset.id, ca: tr.querySelector('[data-f=ca]').value, exam: tr.querySelector('[data-f=exam]').value }));
+  try { const r = await api('PUT', '/api/gradesheet', { class_id: G.c, subject_id: G.s, term: G.t, rows }); toast(`Saved scores for ${r.saved} students`); } catch (e) { fail(e); }
+}
+/* ---------- result sheet ---------- */
+function resultSheet(r) {
+  const P = S.pub, st = r.student, t3 = r.term === 3, tn = ['First', 'Second', 'Third'][r.term - 1];
+  const pos = (p, n) => p ? `${ord(p)} of ${n}` : '–';
+  let body;
+  if (!r.subjects.length) body = '<p style="padding:20px;text-align:center;color:#555">No results have been recorded for this term yet.</p>';
+  else if (!t3) body = `<table><thead><tr><th>Subject</th><th class="num">CA (30)</th><th class="num">Exam (70)</th><th class="num">Total (100)</th><th class="num">Grade</th><th>Remark</th></tr></thead><tbody>${r.subjects.map(s => `<tr><td>${esc(s.subject)}</td><td class="num">${fmt(s.ca)}</td><td class="num">${fmt(s.exam)}</td><td class="num"><b>${fmt(s.total)}</b></td><td class="num">${s.grade}</td><td>${esc(s.remark)}</td></tr>`).join('')}</tbody></table>
+    <div class="sh-sum"><div>Subjects<b>${r.summary.subject_count}</b></div><div>Total score<b>${fmt(r.summary.total)}</b></div><div>Average<b>${fmt(r.summary.average)}</b></div><div>Position in class<b>${pos(r.summary.position, r.summary.class_size)}</b></div><div>Grade<b>${r.summary.grade || '–'}</b></div></div>`;
+  else body = `<table><thead><tr><th>Subject</th><th class="num">1st Term</th><th class="num">2nd Term</th><th class="num">3rd CA (30)</th><th class="num">3rd Exam (70)</th><th class="num">3rd Term Total</th><th class="num">Cumulative</th><th class="num">Average</th><th class="num">Grade</th><th>Remark</th></tr></thead><tbody>${r.subjects.map(s => `<tr><td>${esc(s.subject)}</td><td class="num">${fmt(s.t1)}</td><td class="num">${fmt(s.t2)}</td><td class="num">${fmt(s.ca)}</td><td class="num">${fmt(s.exam)}</td><td class="num"><b>${fmt(s.t3)}</b></td><td class="num"><b>${fmt(s.cumulative)}</b></td><td class="num">${fmt(s.average)}</td><td class="num">${s.grade}</td><td>${esc(s.remark)}</td></tr>`).join('')}</tbody></table>
+    <div class="sh-sum"><div>Subjects<b>${r.summary.subject_count}</b></div><div>3rd term total<b>${fmt(r.summary.total)}</b></div><div>3rd term average<b>${fmt(r.summary.average)}</b></div><div>3rd term position<b>${pos(r.summary.position, r.summary.class_size)}</b></div></div>
+    <div class="sh-cum"><h4>Cumulative for the ${esc(r.session)} session</h4><div class="sh-sum" style="margin:0"><div>Cumulative total<b>${fmt(r.cumulative.total)}</b></div><div>Session average<b>${fmt(r.cumulative.average)}</b></div><div>Overall position<b>${pos(r.cumulative.position, r.cumulative.class_size)}</b></div><div>Overall grade<b>${r.cumulative.grade || '–'} ${r.cumulative.remark ? '· ' + esc(r.cumulative.remark) : ''}</b></div></div></div>`;
+  return `<div class="sheet"><div class="sh-head">${logoHTML()}<div><h2>${esc(P.schoolName)}</h2>${P.address ? `<p>${esc(P.address)}</p>` : ''}<p>${[P.phone, P.email].filter(Boolean).map(esc).join(' · ')}</p></div></div>
+  <div class="sh-title">${tn} Term Report${t3 ? ' (with Cumulative)' : ''}</div>
+  <div class="sh-info"><div><span>Name:</span> <b>${esc(st.last_name)} ${esc(st.first_name)}</b></div><div><span>Admission no:</span> ${esc(st.admission_no)}</div><div><span>Class:</span> ${esc(r.class_name)}</div>
+  <div><span>Session:</span> ${esc(r.session)}</div><div><span>Term:</span> ${tn}</div><div><span>Gender:</span> ${esc(st.gender || '–')}</div></div>
+  ${body}<div class="sh-key">Grading: A 70–100 Excellent · B 60–69 Very Good · C 50–59 Good · D 45–49 Fair · E 40–44 Pass · F 0–39 Fail. Each subject is CA 30 marks + Exam 70 marks.</div>
+  <div class="sh-sign"><div>Class teacher</div><div>Principal</div><div>Parent / guardian</div></div></div>`;
+}
+
+/* ---------- parent / student: results ---------- */
+async function pMyResults() {
+  const isParent = S.me.role === 'parent';
+  const [kids, sessions, pub] = await Promise.all([isParent ? api('GET', '/api/my/children') : Promise.resolve([{ id: S.me.ref_id, first_name: S.me.name, last_name: '' }]), api('GET', '/api/sessions'), api('GET', '/api/public')]); S.pub = pub;
+  if (!kids.length) { V().innerHTML = `${head("Children's Results")}<div class="note">No student is linked to your account yet. Please contact the school office.</div>`; return; }
+  V().innerHTML = `${head(isParent ? "Children's Results" : 'My Results')}<div class="toolbar">
+  ${isParent ? field('Child', `<select id="mk">${kids.map(k => `<option value="${k.id}">${esc(k.first_name + ' ' + k.last_name)}${k.class_name ? ' (' + esc(k.class_name) + ')' : ''}</option>`).join('')}</select>`) : `<input type="hidden" id="mk" value="${kids[0].id}">`}
+  ${field('Session', `<select id="ms">${sessions.map(s => `<option${s === pub.session ? ' selected' : ''}>${esc(s)}</option>`).join('')}</select>`)}
+  ${field('Term', `<select id="mt">${[1, 2, 3].map(t => `<option value="${t}"${String(t) === pub.term ? ' selected' : ''}>${['First', 'Second', 'Third (with cumulative)'][t - 1]}</option>`).join('')}</select>`)}
+  <button class="btn" onclick="showMy()">Show</button></div><div id="mres"></div>`;
+  showMy();
+}
+async function showMy() {
+  try { const r = await api('GET', `/api/results/${$('#mk').value}?session=${encodeURIComponent($('#ms').value)}&term=${$('#mt').value}`); $('#mres').innerHTML = resultSheet(r); } catch (e) { fail(e); }
+}
+/* ---------- admin: results and printing ---------- */
+let RES = [];
+async function pAdminResults() {
+  const [classes, sessions] = await Promise.all([api('GET', '/api/classes'), api('GET', '/api/sessions')]); S.pub = await api('GET', '/api/public');
+  V().innerHTML = `${head('Results & Printing')}<div class="toolbar">
+  ${field('Session', `<select id="rs">${sessions.map(s => `<option${s === S.pub.session ? ' selected' : ''}>${esc(s)}</option>`).join('')}</select>`)}
+  ${field('Class', `<select id="rc">${opts(classes, '', c => c.name, 'Choose class')}</select>`)}
+  ${field('Term', `<select id="rt">${[1, 2, 3].map(t => `<option value="${t}"${String(t) === S.pub.term ? ' selected' : ''}>${['First', 'Second', 'Third (with cumulative)'][t - 1]}</option>`).join('')}</select>`)}
+  <button class="btn" onclick="loadResults()">Show</button></div><div id="rlist"></div>`;
+}
+async function loadResults() {
+  const c = $('#rc').value; if (!c) return toast('Choose a class', true);
+  try {
+    RES = await api('GET', `/api/results/class/${c}?session=${encodeURIComponent($('#rs').value)}&term=${$('#rt').value}`);
+    const t3 = $('#rt').value === '3';
+    $('#rlist').innerHTML = (RES.length ? `<div style="margin-bottom:12px"><button class="btn" onclick="printAll()">Print all ${RES.length} result sheets</button></div>` : '') + table(['Position', 'Adm. no', 'Name', 'Subjects', t3 ? '3rd term total' : 'Total', t3 ? 'Session average' : 'Average', ''],
+      RES.map((r, i) => `<tr><td>${r.summary.position || '–'}</td><td>${esc(r.student.admission_no)}</td><td><b>${esc(r.student.last_name)}</b> ${esc(r.student.first_name)}</td><td>${r.summary.subject_count}</td><td>${fmt(r.summary.total)}</td><td>${fmt(t3 ? r.cumulative.average : r.summary.average)}</td><td class="row-actions"><button class="btn ghost sm" onclick="viewRes(${i})">View</button><button class="btn sm" onclick="printRes(${i})">Print</button></td></tr>`),
+      'No grades have been entered for this class, session and term yet.');
+  } catch (e) { fail(e); }
+}
+const viewRes = i => openModal('Result sheet', resultSheet(RES[i]) + `<div class="acts"><button class="btn" onclick="printRes(${i})">Print</button><button class="btn ghost" onclick="closeModal()">Close</button></div>`, true);
+const printRes = i => printHTML(resultSheet(RES[i]));
+const printAll = () => printHTML(RES.map(resultSheet).join(''));
+/* ---------- admin: logins ---------- */
+async function pAccounts() {
+  const users = await api('GET', '/api/users');
+  V().innerHTML = `${head('Accounts & Passwords', '<button class="btn" onclick="adminForm()">+ Add administrator</button>')}
+  <p style="margin-bottom:12px;color:var(--muted)">Only you can reset passwords. Users cannot change their own.</p>
+  ${table(['Username', 'Name', 'Role', 'Status', ''], users.map(u => `<tr><td><b>${esc(u.username)}</b></td><td>${esc(u.name)}</td><td><span class="pill">${esc(u.role)}</span></td><td>${u.active ? '<span class="pill ok">active</span>' : '<span class="pill off">disabled</span>'}</td>
+  <td class="row-actions"><button class="btn sm" onclick="resetPw(${u.id},'${esc(u.username)}')">Reset password</button><button class="btn ghost sm" onclick="renameUser(${u.id},'${esc(u.username)}')">Change username</button>${u.id === S.me.id ? '' : `<button class="btn ${u.active ? 'danger' : 'ghost'} sm" onclick="toggleUser(${u.id},${u.active ? 0 : 1})">${u.active ? 'Disable' : 'Enable'}</button>`}</td></tr>`), 'No accounts.')}`;
+}
+function resetPw(id, name) {
+  openModal('Reset password', `<form id="rf" onsubmit="return false"><p style="margin-bottom:12px">Account: <b>${esc(name)}</b>. They will be logged out.</p>${field('New password', inp('password', '', 'text', 'autocomplete="off"'), 'Leave blank to generate one. At least 6 characters.')}
+  <div class="acts"><button class="btn" onclick="doReset(${id})">Reset</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div></form>`);
+}
+async function doReset(id) { try { const r = await api('POST', `/api/users/${id}/reset`, fd('#rf')); closeModal(); showCreds([r], 'Password reset'); } catch (e) { fail(e); } }
+async function renameUser(id, cur) { const v = await askText('Change username', cur, 'Username'); if (!v) return; try { await api('PUT', '/api/users/' + id, { username: v }); toast('Username changed'); pAccounts(); } catch (e) { fail(e); } }
+async function toggleUser(id, active) { try { await api('PUT', '/api/users/' + id, { active: !!active }); pAccounts(); } catch (e) { fail(e); } }
+function adminForm() {
+  openModal('Add administrator', `<form id="af" onsubmit="return false">${field('Username *', inp('username', ''))}${field('Password', inp('password', ''), 'Blank = auto-generated')}<div class="acts"><button class="btn" onclick="saveAdmin()">Create</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div></form>`);
+}
+async function saveAdmin() { try { const c = await api('POST', '/api/users', { role: 'admin', ...fd('#af') }); closeModal(); showCreds([c], 'Administrator created'); pAccounts(); } catch (e) { fail(e); } }
+/* ---------- admin: promotion ---------- */
+let PC = [];
+async function pPromote() {
+  PC = await api('GET', '/api/classes'); S.pub = await api('GET', '/api/public');
+  V().innerHTML = `${head('Promotion')}
+  ${S.pub.term !== '3' ? `<div class="note">The current term is Term ${esc(S.pub.term)}. Promotion is normally done after Third Term results are final.</div>` : ''}
+  <p style="margin-bottom:12px;color:var(--muted)">Pick a class, untick any student who should repeat, choose where they go, and promote. Past results stay on each student's record.</p>
+  <div class="toolbar">${field('Promote from', `<select id="pfrom" onchange="loadPromo()">${opts(PC, '', c => `${c.name} (${c.students})`, 'Choose class')}</select>`)}</div><div id="promo"></div>`;
+}
+async function loadPromo() {
+  const cid = $('#pfrom').value; if (!cid) { $('#promo').innerHTML = ''; return; }
+  const list = await api('GET', `/api/students?class_id=${cid}&status=active`);
+  const idx = PC.findIndex(c => String(c.id) === cid), next = PC[idx + 1];
+  $('#promo').innerHTML = !list.length ? '<div class="tablebox"><div class="empty">No active students in this class.</div></div>' : `
+  <div class="tablebox" style="margin-bottom:14px"><table><thead><tr><th><input type="checkbox" id="pall" checked onchange="document.querySelectorAll('.pk').forEach(c=>c.checked=this.checked)"></th><th>Adm. no</th><th>Name</th></tr></thead><tbody>
+  ${list.map(s => `<tr><td><input type="checkbox" class="pk" value="${s.id}" checked></td><td>${esc(s.admission_no)}</td><td>${esc(s.last_name)} ${esc(s.first_name)}</td></tr>`).join('')}</tbody></table></div>
+  <div class="toolbar">${field('Move selected students to', `<select id="pto">${PC.filter(c => String(c.id) !== cid).map(c => `<option value="${c.id}"${next && next.id === c.id ? ' selected' : ''}>${esc(c.name)}</option>`).join('')}<option value="grad"${next ? '' : ' selected'}>Graduate (leaves the school)</option></select>`)}<button class="btn" onclick="doPromote()">Promote selected</button></div>`;
+}
+async function doPromote() {
+  const ids = [...document.querySelectorAll('.pk:checked')].map(c => +c.value); const to = $('#pto').value;
+  if (!ids.length) return toast('Tick at least one student', true);
+  if (!confirm(`${to === 'grad' ? 'Graduate' : 'Promote'} ${ids.length} student(s)?`)) return;
+  try {
+    const r = await api('POST', '/api/promote', to === 'grad' ? { student_ids: ids, graduate: true } : { student_ids: ids, to_class_id: +to });
+    toast(`${r.moved} student(s) ${to === 'grad' ? 'graduated' : 'promoted'}`); PC = await api('GET', '/api/classes'); const cur = $('#pfrom').value;
+    $('#pfrom').innerHTML = opts(PC, cur, c => `${c.name} (${c.students})`, 'Choose class'); loadPromo();
+  } catch (e) { fail(e); }
+}
+/* ---------- admin: settings (the editable header) ---------- */
+async function pSettings() {
+  const P = S.pub = await api('GET', '/api/public');
+  V().innerHTML = `${head('School Settings')}<p style="margin-bottom:14px;color:var(--muted)">The school name, logo, colours and contact details appear in the header, on the login page and on every printed result sheet. Change them here to use this portal for a different school. The session and term are under Classes &amp; Sessions.</p>
+  <form class="card" id="setf" onsubmit="return false">
+  <div class="grid2">${field('School name *', inp('schoolName', P.schoolName))}${field('Tagline / motto', inp('tagline', P.tagline))}</div>
+  <div class="grid2">${field('Logo letters (blank = book icon)', inp('logoText', P.logoText, 'text', 'maxlength="3"'))}${field('Logo image', '<input type="file" id="logofile" accept="image/png,image/jpeg,image/webp,image/svg+xml">', 'PNG, JPG or SVG, up to about 300 KB. Or paste an image link below.')}</div>
+  ${field('Logo image link (optional)', `<input type="text" name="logoUrl" id="logourl" value="${P.logoUrl && P.logoUrl.startsWith('data:') ? '' : esc(P.logoUrl)}" placeholder="https://…">`, P.logoUrl && P.logoUrl.startsWith('data:') ? 'An uploaded image is in use. Leave this blank to keep it.' : '')}
+  <div class="grid2">${field('Main colour', inp('primaryColor', P.primaryColor, 'color'))}${field('Accent colour', inp('accentColor', P.accentColor, 'color'))}</div>
+  <div class="grid2">${field('Address', inp('address', P.address))}${field('Phone', inp('phone', P.phone))}</div>
+  ${field('Email', inp('email', P.email, 'email'))}
+  <div class="acts"><button class="btn" onclick="saveSettings()">Save settings</button></div></form>`;
+  $('#logofile').onchange = e => {
+    const f = e.target.files[0]; if (!f) return;
+    if (f.size > 350000) { toast('That image is too big. Please use one under 300 KB.', true); e.target.value = ''; return; }
+    const rd = new FileReader(); rd.onload = () => { $('#logourl').dataset.up = rd.result; toast('Logo ready. Press Save settings.'); }; rd.readAsDataURL(f);
+  };
+}
+async function saveSettings() {
+  const d = fd('#setf'); const up = $('#logourl').dataset.up;
+  if (up) d.logoUrl = up; else if (!d.logoUrl && S.pub.logoUrl && S.pub.logoUrl.startsWith('data:')) d.logoUrl = S.pub.logoUrl;
+  try { S.pub = await api('PUT', '/api/settings', d); applyTheme(); toast('Settings saved'); appView(); } catch (e) { fail(e); }
+}
+/* ---------- admin: backup and restore ---------- */
+async function pBackup() {
+  const info = await api('GET', '/api/backup/info');
+  const last = info.last_backup ? new Date(info.last_backup) : null;
+  const days = last ? Math.floor((Date.now() - last) / 864e5) : null;
+  V().innerHTML = `${head('Backup & Restore')}
+  ${last === null || days > 7 ? `<div class="note">${last ? `Your last backup was ${days} days ago.` : 'You have not made a backup yet.'} Download one now and keep it somewhere safe.</div>` : ''}
+  <div class="two">
+  <div class="card"><h3>Back up</h3>
+    <p>Download one file with everything: students, parents, teachers, grades, logins and school settings. Keep copies on a flash drive or in cloud storage, not only on this computer.</p>
+    <p style="margin-top:10px"><b>Now:</b> ${info.students} students, ${info.grades} grade records.<br><b>Last backup:</b> ${last ? esc(last.toLocaleString()) : 'never'}</p>
+    <div class="acts" style="margin-top:14px"><a class="btn" href="/api/backup" download onclick="setTimeout(pBackup,1500)">Download backup</a></div></div>
+  <div class="card"><h3>Restore</h3>
+    <p>Choose a backup file you downloaded earlier. This <b>replaces all current school data</b> with the contents of that file. A safety copy of the current data is saved on the server first, and everyone is logged out.</p>
+    <div style="margin-top:14px"><input type="file" id="rfile" accept=".db"></div>
+    <div class="acts"><button class="btn danger" onclick="restoreBackup()">Restore from this file</button></div></div></div>
+  <p style="margin-top:14px;color:var(--muted);font-size:14px">A backup file contains logins (as scrambled passwords) and student records, so treat it as private.</p>`;
+}
+async function restoreBackup() {
+  const f = $('#rfile').files[0];
+  if (!f) return toast('Choose a backup file first', true);
+  if (prompt(`Restore from "${f.name}"?\n\nThis replaces ALL current school data with the contents of this file. Everyone will be logged out.\n\nType RESTORE to continue.`) !== 'RESTORE') return;
+  try {
+    const r = await fetch('/api/restore', { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, credentials: 'same-origin', body: f });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'Restore failed');
+    location.hash = ''; S.me = null; await boot();
+    toast('Backup restored. Please log in again.');
+  } catch (e) { toast(e.message, true); }
+}
+boot();
+</script>
+</body>
+</html>
