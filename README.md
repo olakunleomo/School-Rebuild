@@ -2,23 +2,21 @@
 
 Administrators register students, parents and teachers. Teachers enter grades (Continuous Assessment 30 + Exam 70). Parents and students log in to see results. Administrators print result sheets.
 
-## Run it
+## Run it on Netlify
 
-1. Install Node.js 22.5 or newer (https://nodejs.org). Nothing else to install.
-2. In this folder run: `node server.js`
-3. Open http://localhost:3000
+The frontend is published from `public`, and `netlify/server/index.mjs` serves the portal API. Node.js 24 is required. School records and sessions use Netlify Database (Postgres) through Drizzle; the server does not keep a local live database.
 
-The first time it runs it creates the administrator login and prints it in the terminal
-(also saved in `data/FIRST_ADMIN_LOGIN.txt`; delete that file after you log in).
-To choose the password yourself: `ADMIN_PASSWORD=MySecret123 node server.js`
+Install dependencies with `npm install`. Set `ADMIN_PASSWORD` securely in Netlify for production and deploy previews before first use (at least 12 characters). The initial administrator username is `admin`. The password is used only when creating the first administrator; later password changes remain in Accounts & Passwords. Credentials are never printed or saved to disk.
 
-All data lives in one file: `data/school.db`. Copy that file regularly to back up.
+Netlify applies the checked-in database migrations during deployment. For local development, use `netlify dev --port 8889` with Netlify's database environment. After changing `db/schema.ts`, generate a migration with `npx drizzle-kit generate --name describe_your_change`.
+
+Existing SQLite backups can be imported from Backup & Restore. Downloads remain SQLite files for compatibility; live records and pre-restore safety snapshots stay in Postgres. Restoring replaces school data and ends all sessions.
 
 ## Using it for a different school
 
 Log in as admin, open **School Settings**, change the school name, tagline, logo, colours, address, phone and email (the default is EduPortal in green).
 These appear in the header, the login page and every printed result sheet.
-To run several schools, use one copy of this folder per school (each has its own `data` folder and its own port: `PORT=3001 node server.js`).
+To run several schools, deploy a separate Netlify project and database for each school.
 
 ## How it works
 
@@ -33,8 +31,6 @@ To run several schools, use one copy of this folder per school (each has its own
 - **New session**: after Third Term, promote the students, then set the new session and Term 1 in Classes & Sessions.
 - Grades of a past session can be corrected by temporarily setting that session and term back in Classes & Sessions.
 
-## Putting it online
+## Verification
 
-Parents need to reach it from their phones, so host it on a server that runs Node 22.5+ and keeps its disk (for example a small VPS, or a host with a persistent volume). Put it behind HTTPS (Caddy, nginx or the host's built-in HTTPS). Set the `PORT` environment variable if the host asks for it. Back up `data/school.db`.
-
-`node test.js` runs the automatic checks.
+`npm test` runs the portal's HTTP checks against an isolated embedded Postgres test database. It covers role permissions, grade calculations, promotions, account changes, transaction rollback, and SQLite backup/restore compatibility without touching deployed records.
