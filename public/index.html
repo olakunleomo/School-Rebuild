@@ -645,7 +645,7 @@ async function pBackup() {
     <p style="margin-top:10px"><b>Now:</b> ${info.students} students, ${info.grades} grade records.<br><b>Last backup:</b> ${last ? esc(last.toLocaleString()) : 'never'}</p>
     <div class="acts" style="margin-top:14px"><a class="btn" href="/api/backup" download onclick="setTimeout(pBackup,1500)">Download backup</a></div></div>
   <div class="card"><h3>Restore</h3>
-    <p>Choose a backup file you downloaded earlier. This <b>replaces all current school data</b> with the contents of that file. A safety copy of the current data is saved on the server first, and everyone is logged out.</p>
+    <p>Choose a backup file you downloaded earlier. This <b>replaces all current school data</b> with the contents of that file. A safety copy of the current data is saved in the database first, and everyone is logged out.</p>
     <div style="margin-top:14px"><input type="file" id="rfile" accept=".db"></div>
     <div class="acts"><button class="btn danger" onclick="restoreBackup()">Restore from this file</button></div></div></div>
   <p style="margin-top:14px;color:var(--muted);font-size:14px">A backup file contains logins (as scrambled passwords) and student records, so treat it as private.</p>`;
@@ -662,7 +662,9 @@ async function restoreBackup() {
     toast('Backup restored. Please log in again.');
   } catch (e) { toast(e.message, true); }
 }
-boot();
+boot().catch(e => {
+  $('#app').innerHTML = `<div class="login-page"><div class="login-card"><h1>Portal temporarily unavailable</h1><p class="lead">${esc(e.message || 'Please try again shortly.')}</p><button class="btn big" onclick="location.reload()">Try again</button></div></div>`;
+});
 </script>
 </body>
 </html>
